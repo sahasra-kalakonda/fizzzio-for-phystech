@@ -1,5 +1,3 @@
-// used github copilot to learn about the curves, and implementing the discipline balance graphs
-
 let lineChartCanvas = null;
 let radarChartCanvas = null;
 let animationFrameId = null;
