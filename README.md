@@ -1,37 +1,113 @@
 # Fizzzio
-#### Video Demo:  <https://www.youtube.com/watch?v=dgn19WHoI4M>
-#### Description:
 
-Fizzzio is a fitness account for your movement life ~ it tracks every workout, stretch, and casual movement against a personal streak and weekly goals. It's a full-stack app with a vanilla JavaScript frontend and a Flask/SQLite backend, built around **Fizz Coach**, a real-time AI posture guide that watches a user's squat depth, hip alignment, and core stability through a webcam and tells them what to fix in the moment.
+#### Video Demo: <https://www.youtube.com/watch?v=Y7ekfyyPohM>
 
-The motivation: physical therapy runs $100–$200 a session, and a full course can cost thousands. Most fitness apps log reps and calories but stay silent on whether someone is moving safely. Fizzzio closes that gap with a laptop webcam, and does so honestly ~ the posture feature runs on real, on-device pose detection and real joint-angle math, not a canned animation.
+Fizzzio is a fitness tracking app that watches how you move, not just how much. Log workouts, stretches, and casual movement against a personal streak and weekly goals, and get real-time form feedback from **Fizz Coach** ~ an on-device AI posture guide that uses your webcam to check squat depth, hip alignment, and core stability and tells you what to fix in the moment. It's a full-stack app with a vanilla JavaScript frontend and a Flask/SQLite backend.
 
-The app is a single-page application with four views shown and hidden inside one `index.html`: **Buzzboard** (dashboard), **Logzz** (activity logging), **Posture AI Guide** (Fizz Coach), and **Recovery Map** (stretching). All four sit behind a shared auth overlay, so history, streaks, and notifications persist to a real per-user database rather than browser memory.
+## Getting Started
 
-## Project Structure and What Each File Does
+These instructions will guide you on how to set up and run Fizzzio locally for development and testing purposes.
 
-**`index.html`** holds the entire frontend in one page: an auth overlay, four `<section class="app-view">` blocks shown/hidden by `app.js`, and the inline SVG body diagrams used by the Recovery Map. **`style.css`** styles all of it.
+### Prerequisites
 
-**`app.js`** is the main module and glue code: a small `state` object (current user, cached activities, notifications, streak), the auth forms, session check on load, view navigation, the logs list/table with filtering, the activity form, the notification bell, and the calls that initialize `charts.js`, `posture.js`, and `recovery.js` as their views become active.
+To run Fizzzio, you will need:
 
-**`api.js`** is a thin `fetch()` wrapper every other module uses to talk to the backend: one function per endpoint, sending the session cookie automatically and throwing a clear error if the backend is unreachable.
+* Python 3.10+ and pip for the backend
+* A modern browser with webcam access for the Posture AI Guide (no Node.js or build step needed ~ the frontend is plain HTML/CSS/JS)
 
-**`charts.js`** is a custom canvas chart engine for the Buzzboard: the 7-day line chart and discipline-balance radar chart are drawn onto `<canvas>` with hand-written Bézier curve math and device-pixel-ratio scaling.
+### Installing
 
-**`posture.js`** implements Fizz Coach. Its primary mode loads Google's MediaPipe Pose Landmarker (BlazePose) and runs it in-browser via WebAssembly, returning 33 real body landmarks per frame from the webcam with no backend involvement. A `getAngle()` helper recomputes joint angles each frame with `atan2` trigonometry (the same approach used in clinical biomechanics) driving metrics like knee flexion and hip-torso tilt. If the camera is denied or the model fails to load, it falls back to a sine-wave mock skeleton so the feature degrades gracefully instead of breaking.
+Follow these steps to get your development environment running:
 
-**`recovery.js`** holds a `muscleDatabase` of strain causes and matching stretches (hold times, form tips), plus the logic that loads a protocol when a user clicks a region on the SVG body map.
+#### Backend
+ 
+1. Clone the repository and navigate to the backend directory:
+```
+cd backend
+```
+ 
+2. Create and activate a virtual environment:
+```
+python -m venv venv
+source venv/bin/activate        # macOS / Linux
+.\venv\Scripts\activate         # Windows
+```
+ 
+3. Install dependencies:
+```
+pip install -r requirements.txt
+```
+ 
+4. Start the Flask backend:
+```
+python app.py
+```
+ 
+This starts the API on `http://localhost:5000`.
+ 
+#### Frontend
+ 
+1. `index.html` hardcodes the production API URL on this line:
+```html
+window.FIZZZIO_API_BASE = 'https://fizzzio-backend-zym7.onrender.com/api';
+```
+ 
+For local development, comment this line out (or delete it) so the frontend falls back to `api.js`'s default of `http://localhost:5000/api` and talks to your local backend instead of the deployed one on Render:
+ 
+```html
+<!-- window.FIZZZIO_API_BASE = 'https://fizzzio-backend-zym7.onrender.com/api'; -->
+```
+ 
+Remember to restore it before deploying again.
+ 
+2. From the project root, start the local static file server:
+```
+python server.py
+```
+ 
+3. Open `http://localhost:8080` in your browser.
+Make sure the backend (step above) is running at the same time, since the frontend has no functionality without it.
+ 
+## Configuration
+ 
+Fizzzio's backend reads its configuration from environment variables (see `render.yaml` for the production values used on Render):
+ 
+```
+FIZZZIO_SECRET_KEY=your_secret_key_here     # signs session cookies — required
+FIZZZIO_HTTPS=0                             # set to "1" in production for Secure cookies
+FIZZZIO_ALLOWED_ORIGINS=http://localhost:8080  # comma-separated CORS allow-list
+```
+ 
+For local development, `FIZZZIO_HTTPS=0` keeps cookies working over plain HTTP. In production, the frontend and backend live on different origins (Netlify and Render), so `FIZZZIO_HTTPS=1` and `SameSite=None; Secure` cookies are required for the session to cross origins.
+ 
+No external API keys are needed — posture detection runs entirely on-device.
+ 
+## Live App
+ 
+* **Frontend:** <https://dulcet-fairy-d1c5f7.netlify.app/>
+* **Backend API:** <https://fizzzio-backend-zym7.onrender.com/api>
 
-**`server.py`** is a small local-dev static file server that serves the frontend on `localhost:8080` and maps `.js` to `application/javascript`, since some systems don't recognize ES module imports otherwise.
+## Built With
 
-**`render.yaml`** is a Render Blueprint for the backend: it installs dependencies, starts the app with `gunicorn`, and sets the environment variables needed for secure cross-origin cookies once the frontend is live on Netlify.
+* **Frontend:** Vanilla JavaScript (ES modules), HTML5, CSS3 — no framework or build tool
+* **Charts:** Hand-written Canvas API rendering with Bézier curve math
+* **AI / Computer Vision:** Google MediaPipe Tasks-Vision ~ Pose Landmarker (BlazePose), running on-device via WebAssembly
+* **Backend:** Flask, Werkzeug, Gunicorn (Python)
+* **Database:** SQLite
+* **Fonts:** Google Fonts (Inter)
+* **Infrastructure & Hosting:** Render (backend, deployed via `render.yaml` Blueprint), Netlify (frontend)
 
-**`backend/app.py`** is the entire backend: it creates the SQLite schema on first run (`users`, `activities`, `notifications`, cascading foreign keys), hashes passwords, issues signed session cookies, checks them via a `login_required` decorator, calculates streaks server-side, and handles CORS manually with an explicit allow-list. **`backend/requirements.txt`** pins `Flask`, `Werkzeug`, and `gunicorn`. **`backend/README.md`** documents the API reference, schema, and environment variables in detail.
+## Contributing
 
-## Design Choices Worth Explaining
+If you're interested in contributing to Fizzzio, please read through the project files and reach out to the team to see how you can help.
 
-SQLite over a managed database fit the project's scale: it's a single file with zero setup, and since every query goes through one `get_db()` helper, swapping it later would be contained rather than a rewrite. Fizzzio has exactly one frontend talking to its own backend, so the browser already handles storage and expiry, and Flask's signing prevents tampering without needing token-refresh logic.
+## Main Authors
 
-The most deliberate choice is in `posture.js`: the original sine-wave mock skeleton wasn't discarded, but kept as an explicit simulation fallback. Real, on-device MediaPipe detection is the primary mode, since that's what the feature is actually for, but webcam permissions get denied and CDNs occasionally fail. Falling back to simulation then degrades the demo instead of breaking it, while keeping that fallback clearly separate from real measurement in the code.
+* [sahasra-kalakonda Sahasra Kalakonda](https://github.com/sahasra-kalakonda)
+* [tanvi-s-a](https://github.com/tanvi-s-a)
+* [Striderzimmerman-wq](https://github.com/Striderzimmerman-wq)
 
-Finally, manual CORS with an explicit `FIZZZIO_ALLOWED_ORIGINS` allow-list, paired with `SameSite=None; Secure` cookies, reflects the same reasoning: the Netlify frontend and Render backend live on different origins, so the session cookie crosses origins on every request.
+## Acknowledgments
+
+* Thanks to Google for the MediaPipe Pose Landmarker model powering Fizz Coach.
+* Thanks to the open-source contributors behind Flask and MediaPipe.
