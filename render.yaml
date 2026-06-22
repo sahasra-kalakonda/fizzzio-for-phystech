@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: fizzzio-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT app:app
+    plan: free
+    envVars:
+      - key: FIZZZIO_SECRET_KEY
+        generateValue: true
+      - key: FIZZZIO_HTTPS
+        value: "1"
+      - key: FIZZZIO_ALLOWED_ORIGINS
+        value: "https://dulcet-fairy-d1c5f7.netlify.app"
