@@ -1,5 +1,5 @@
 # Fizzzio
-#### Video Demo:  <https://www.youtube.com/watch?v=Y7ekfyyPohM>
+#### Video Demo:  <https://www.youtube.com/watch?v=dgn19WHoI4M>
 #### Description:
 
 Fizzzio is a fitness account for your movement life ~ it tracks every workout, stretch, and casual movement against a personal streak and weekly goals. It's a full-stack app with a vanilla JavaScript frontend and a Flask/SQLite backend, built around **Fizz Coach**, a real-time AI posture guide that watches a user's squat depth, hip alignment, and core stability through a webcam and tells them what to fix in the moment.
