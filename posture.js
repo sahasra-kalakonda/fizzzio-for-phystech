@@ -1,6 +1,4 @@
 // FIZZZIO - REAL AI POSTURE CAMERA ENGINE
-// used chat gbt too understand on how to change the webcam feature from an
-// automatic simulation to an actual detection-system
 
 // Uses Google's MediaPipe Pose Landmarker (BlazePose) running entirely
 // in-browser via WebAssembly
