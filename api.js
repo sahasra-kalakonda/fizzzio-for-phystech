@@ -1,5 +1,4 @@
 // FIZZZIO API CLIENT
-// used github copilot to find and plug in apis
 
 // Thin wrapper around fetch() for talking to the Flask backend.
 // Centralizing this here means app.js never has to think about
